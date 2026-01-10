@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
@@ -9,13 +9,20 @@ import InstancePortal from './components/InstancePortal';
 import InstanceDashboard from './components/InstanceDashboard';
 import './styles/index.css';
 
-function AppContent() {
-  const location = useLocation();
+// Instance routes - completely separate from admin
+function InstanceRoutes() {
+  return (
+    <Routes>
+      <Route path="/instance/:subdomain" element={<InstancePortal />} />
+      <Route path="/instance/:subdomain/dashboard" element={<InstanceDashboard />} />
+    </Routes>
+  );
+}
+
+// Admin routes - require authentication
+function AdminRoutes() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [currentPage, setCurrentPage] = useState('dashboard');
-
-  // Check if we're in an instance portal (check first, before auth)
-  const isInstanceRoute = location.pathname.startsWith('/instance/');
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
@@ -27,22 +34,10 @@ function AppContent() {
     setCurrentPage('dashboard');
   };
 
-  // Show instance portal routes WITHOUT requiring admin login
-  if (isInstanceRoute) {
-    return (
-      <Routes>
-        <Route path="/instance/:subdomain" element={<InstancePortal />} />
-        <Route path="/instance/:subdomain/dashboard" element={<InstanceDashboard />} />
-      </Routes>
-    );
-  }
-
-  // Show admin login if not logged in
   if (!isLoggedIn) {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
-  // Show admin dashboard
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar currentPage={currentPage} onPageChange={setCurrentPage} onLogout={handleLogout} />
@@ -56,14 +51,22 @@ function AppContent() {
 }
 
 function App() {
+  const location = useLocation();
+  
+  // If URL starts with /instance/, show instance portal (no admin auth needed)
+  if (location.pathname.startsWith('/instance/')) {
+    return <InstanceRoutes />;
+  }
+
+  // Otherwise show admin dashboard
+  return <AdminRoutes />;
+}
+
+// Main entry point with Router
+export default function AppWrapper() {
   return (
     <Router>
-      <Routes>
-        <Route path="/instance/*" element={<AppContent />} />
-        <Route path="*" element={<AppContent />} />
-      </Routes>
+      <App />
     </Router>
   );
 }
-
-export default App;
