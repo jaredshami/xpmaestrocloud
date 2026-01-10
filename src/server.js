@@ -23,13 +23,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
-// View engine setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../views'));
-
 // Routes
 app.get('/', (req, res) => {
-  res.render('index');
+  res.json({ message: 'XP Maestro Cloud API', version: '1.0.0', docs: '/api/docs' });
 });
 
 app.use('/api/auth', authRoutes);

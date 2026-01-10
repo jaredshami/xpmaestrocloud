@@ -27,6 +27,7 @@ exports.createInstance = async (req, res, next) => {
     const subdomain = generateSubdomain(client.customerId, instanceId, environment);
     const folderPath = generateFolderPath(client.customerId, instanceId, environment);
 
+    let vpsSetupSuccess = false;
     try {
       // Create folder on VPS
       await vpsManager.connect();
@@ -42,8 +43,11 @@ exports.createInstance = async (req, res, next) => {
       await vpsManager.reloadNginx();
 
       await vpsManager.disconnect();
+      vpsSetupSuccess = true;
     } catch (vpsError) {
-      throw new Error(`Failed to set up instance on VPS: ${vpsError.message}`);
+      // Log the error but allow instance creation to continue
+      console.warn(`VPS setup skipped for instance: ${vpsError.message}`);
+      // Instance will still be created in database
     }
 
     // Save instance to database
