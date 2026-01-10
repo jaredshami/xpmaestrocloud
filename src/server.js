@@ -30,6 +30,25 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+
+// Public endpoint to lookup instance by subdomain (for instance portal)
+app.get('/api/public/instance/:subdomain', async (req, res) => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    const instance = await prisma.instance.findUnique({
+      where: { subdomain: req.params.subdomain },
+      select: { id: true, subdomain: true, environment: true },
+    });
+    if (!instance) {
+      return res.status(404).json({ error: 'Instance not found' });
+    }
+    res.json(instance);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.use('/api/clients', authenticateToken, clientRoutes);
 app.use('/api/instances', authenticateToken, instanceRoutes);
 app.use('/api/instances/:instanceId/users', instanceUserRoutes);

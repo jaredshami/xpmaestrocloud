@@ -20,15 +20,15 @@ export default function InstancePortal() {
     setError('');
 
     try {
-      // First, get the instance ID from subdomain
-      const response = await api.get(`/instances?subdomain=${subdomain}`);
-      const instance = response.data[0];
+      // Get instance by subdomain (public endpoint - no auth needed)
+      const instanceResponse = await api.get(`/public/instance/${subdomain}`);
+      const instance = instanceResponse.data;
 
       if (!instance) {
         throw new Error('Instance not found');
       }
 
-      // Try to login
+      // Try to login to instance
       const loginResponse = await api.post(`/instances/${instance.id}/users/login`, {
         instanceId: instance.id,
         email,
