@@ -14,8 +14,8 @@ function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [currentPage, setCurrentPage] = useState('dashboard');
 
-  // Check if we're in an instance portal
-  const isInstancePortal = location.pathname.includes('/instance/');
+  // Check if we're in an instance portal (check first, before auth)
+  const isInstanceRoute = location.pathname.startsWith('/instance/');
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
@@ -27,8 +27,8 @@ function AppContent() {
     setCurrentPage('dashboard');
   };
 
-  // Show instance portal without admin auth
-  if (isInstancePortal) {
+  // Show instance portal routes WITHOUT requiring admin login
+  if (isInstanceRoute) {
     return (
       <Routes>
         <Route path="/instance/:subdomain" element={<InstancePortal />} />
@@ -42,6 +42,7 @@ function AppContent() {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
+  // Show admin dashboard
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar currentPage={currentPage} onPageChange={setCurrentPage} onLogout={handleLogout} />
@@ -57,9 +58,10 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <Routes>
+        <Route path="/instance/*" element={<AppContent />} />
+        <Route path="*" element={<AppContent />} />
+      </Routes>
     </Router>
   );
 }
-
-export default App;
