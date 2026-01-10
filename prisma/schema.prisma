@@ -50,8 +50,27 @@ model Instance {
 
   // Relations
   client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  users       InstanceUser[]
 
   @@map("instances")
   @@index([clientId])
   @@index([customerId])
+}
+
+model InstanceUser {
+  id          Int       @id @default(autoincrement())
+  instanceId  Int
+  email       String
+  name        String?
+  passwordHash String?
+  role        String    @default("editor") // admin, editor, viewer
+  status      String    @default("active") // active, inactive, pending
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  instance    Instance  @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@unique([instanceId, email])
+  @@map("instance_users")
 }

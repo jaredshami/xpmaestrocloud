@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 const { ValidationError, NotFoundError } = require('../utils/errors');
 const { generateInstanceId, generateSubdomain, generateFolderPath } = require('../utils/subdomainGenerator');
 const vpsManager = require('../utils/vpsCommands');
@@ -60,10 +61,31 @@ exports.createInstance = async (req, res, next) => {
         folderPath,
         environment,
         status: 'active',
+        // Create first admin user for this instance
+        users: {
+          create: {
+            email: client.email,
+            name: client.name,
+            passwordHash: await bcrypt.hash(`${subdomain}-setup-${Date.now()}`, 10),
+            role: 'admin',
+            status: 'pending', // Needs to set password on first login
+          },
+        },
+      },
+      include: {
+        users: true,
       },
     });
 
-    res.status(201).json(instance);
+    res.status(201).json({
+      ...instance,
+      setupDetails: {
+        message: 'Instance created successfully',
+        firstAdminEmail: client.email,
+        adminStatus: 'pending_password_setup',
+        subdomain: instance.subdomain,
+      },
+    });
   } catch (error) {
     next(error);
   }

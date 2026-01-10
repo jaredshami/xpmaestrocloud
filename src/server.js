@@ -8,6 +8,7 @@ const { logger } = require('./utils/logger');
 const authRoutes = require('./routes/auth');
 const clientRoutes = require('./routes/clients');
 const instanceRoutes = require('./routes/instances');
+const instanceUserRoutes = require('./routes/instanceUsers');
 const dashboardRoutes = require('./routes/dashboard');
 
 // Import middleware
@@ -31,6 +32,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/clients', authenticateToken, clientRoutes);
 app.use('/api/instances', authenticateToken, instanceRoutes);
+app.use('/api/instances/:instanceId/users', instanceUserRoutes);
 app.use('/api/dashboard', authenticateToken, dashboardRoutes);
 
 // Health check
