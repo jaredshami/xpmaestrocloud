@@ -52,9 +52,14 @@ function AdminRoutes() {
 
 function App() {
   const location = useLocation();
+  const hostname = window.location.hostname;
   
-  // If URL starts with /instance/, show instance portal (no admin auth needed)
-  if (location.pathname.startsWith('/instance/')) {
+  // Check if on instance subdomain by hostname pattern (e.g., c777351-i824650-prod.xpmaestrocloud.com)
+  // Instance subdomains have the pattern: customerId-instanceId-environment.xpmaestrocloud.com
+  const isInstanceSubdomain = hostname.includes('-') && !hostname.startsWith('www') && hostname.includes('xpmaestrocloud.com');
+  
+  // Also support /instance/ path-based routing for development
+  if (isInstanceSubdomain || location.pathname.startsWith('/instance/')) {
     return <InstanceRoutes />;
   }
 
