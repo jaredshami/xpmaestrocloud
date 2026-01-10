@@ -61,14 +61,14 @@ exports.createInstance = async (req, res, next) => {
         folderPath,
         environment,
         status: 'active',
-        // Create first admin user for this instance
+        // Create first admin user for this instance (NO PASSWORD - user sets on first login)
         users: {
           create: {
             email: client.email,
             name: client.name,
-            passwordHash: await bcrypt.hash(`${subdomain}-setup-${Date.now()}`, 10),
+            passwordHash: null, // User will set password on first login
             role: 'admin',
-            status: 'pending', // Needs to set password on first login
+            status: 'pending_setup', // Waiting for password setup
           },
         },
       },
@@ -82,8 +82,9 @@ exports.createInstance = async (req, res, next) => {
       setupDetails: {
         message: 'Instance created successfully',
         firstAdminEmail: client.email,
-        adminStatus: 'pending_password_setup',
+        adminStatus: 'awaiting_password_setup',
         subdomain: instance.subdomain,
+        accessUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/instance/${subdomain}`,
       },
     });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Lock, ArrowLeft } from 'lucide-react';
+import SetupPassword from './SetupPassword';
 import api from '../services/api';
 
 export default function InstancePortal() {
@@ -10,6 +11,8 @@ export default function InstancePortal() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [setupMode, setSetupMode] = useState(false);
+  const [setupData, setSetupData] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,19 +28,29 @@ export default function InstancePortal() {
         throw new Error('Instance not found');
       }
 
-      // Login to instance
+      // Try to login
       const loginResponse = await api.post(`/instances/${instance.id}/users/login`, {
         instanceId: instance.id,
         email,
-        password,
+        password: password || undefined, // Password not required if needs setup
       });
 
-      // Store instance session
+      // Check if password setup is required
+      if (loginResponse.data.requiresPasswordSetup) {
+        setSetupData({
+          userId: loginResponse.data.userId,
+          instanceId: loginResponse.data.instanceId,
+          email: loginResponse.data.email,
+        });
+        setSetupMode(true);
+        return;
+      }
+
+      // Normal login successful
       localStorage.setItem('instanceToken', loginResponse.data.token);
       localStorage.setItem('instanceUser', JSON.stringify(loginResponse.data.user));
       localStorage.setItem('currentInstance', JSON.stringify(instance));
 
-      // Redirect to instance dashboard
       navigate(`/instance/${subdomain}/dashboard`);
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Login failed');
@@ -45,6 +58,26 @@ export default function InstancePortal() {
       setLoading(false);
     }
   };
+
+  const handleSetupComplete = async (newPassword) => {
+    // Auto-login with new password
+    setPassword(newPassword);
+    setTimeout(() => {
+      handleSubmit({ preventDefault: () => {} });
+    }, 1000);
+  };
+
+  if (setupMode && setupData) {
+    return (
+      <SetupPassword
+        subdomain={subdomain}
+        userId={setupData.userId}
+        instanceId={setupData.instanceId}
+        email={setupData.email}
+        onSetupComplete={handleSetupComplete}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center p-4">
@@ -99,10 +132,10 @@ export default function InstancePortal() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your password"
+                placeholder="Enter your password (leave blank if first time)"
               />
+              <p className="text-xs text-gray-600 mt-1">If this is your first time, password can be left blank</p>
             </div>
 
             <button
@@ -117,10 +150,8 @@ export default function InstancePortal() {
           {/* Footer */}
           <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
             <p className="text-sm text-gray-600 text-center">
-              First time logging in?{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
-                Contact support
-              </a>
+              First time accessing this instance?{' '}
+              <span className="text-blue-600 font-medium">Enter your email and set a password</span>
             </p>
           </div>
         </div>

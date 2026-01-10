@@ -10,8 +10,8 @@ exports.loginInstanceUser = async (req, res, next) => {
   try {
     const { instanceId, email, password } = req.body;
 
-    if (!instanceId || !email || !password) {
-      throw new ValidationError('instanceId, email, and password are required');
+    if (!instanceId || !email) {
+      throw new ValidationError('instanceId and email are required');
     }
 
     const user = await prisma.instanceUser.findUnique({
@@ -27,7 +27,22 @@ exports.loginInstanceUser = async (req, res, next) => {
       throw new AuthenticationError('Invalid credentials');
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.passwordHash || '');
+    // Check if user needs to set password (first time login)
+    if (!user.passwordHash) {
+      return res.status(200).json({
+        requiresPasswordSetup: true,
+        userId: user.id,
+        instanceId: user.instanceId,
+        email: user.email,
+        message: 'Please set your password to continue',
+      });
+    }
+
+    if (!password) {
+      throw new ValidationError('Password is required');
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
     if (!passwordMatch) {
       throw new AuthenticationError('Invalid credentials');
     }
