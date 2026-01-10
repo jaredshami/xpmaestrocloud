@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Lock, ArrowLeft } from 'lucide-react';
 import SetupPassword from './SetupPassword';
-import api from '../services/api';
+import api, { publicApi } from '../services/api';
 
 export default function InstancePortal() {
   const { subdomain } = useParams();
@@ -21,7 +21,7 @@ export default function InstancePortal() {
 
     try {
       // Get instance by subdomain (public endpoint - no auth needed)
-      const instanceResponse = await api.get(`/public/instance/${subdomain}`);
+      const instanceResponse = await publicApi.get(`/public/instance/${subdomain}`);
       const instance = instanceResponse.data;
 
       if (!instance) {

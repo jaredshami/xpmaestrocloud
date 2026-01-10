@@ -6,11 +6,26 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// Add token to requests
+// Public API instance (no auth) - for instance portal
+export const publicApi = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+// Add admin token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Add instance token to instance API requests
+api.interceptors.request.use((config) => {
+  const instanceToken = localStorage.getItem('instanceToken');
+  // Check if this is an instance endpoint and we have an instance token
+  if (instanceToken && config.url?.includes('/instances/')) {
+    config.headers.Authorization = `Bearer ${instanceToken}`;
   }
   return config;
 });
