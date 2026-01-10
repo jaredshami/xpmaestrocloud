@@ -61,11 +61,34 @@ export default function InstancePortal({ subdomain: propSubdomain }) {
   };
 
   const handleSetupComplete = async (newPassword) => {
-    // Auto-login with new password
+    // Auto-login with new password after a short delay for database sync
     setPassword(newPassword);
-    setTimeout(() => {
-      handleSubmit({ preventDefault: () => {} });
-    }, 1000);
+    setSetupMode(false);
+    
+    // Wait a bit for database to sync, then attempt login
+    setTimeout(async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const loginResponse = await publicApi.post(`/instances/${setupData.instanceId}/users/login`, {
+          instanceId: setupData.instanceId,
+          email: setupData.email,
+          password: newPassword,
+        });
+
+        localStorage.setItem('instanceToken', loginResponse.data.token);
+        localStorage.setItem('instanceUser', JSON.stringify(loginResponse.data.user));
+        
+        // Get instance details
+        const instanceResponse = await publicApi.get(`/public/instance/${subdomain}`);
+        localStorage.setItem('currentInstance', JSON.stringify(instanceResponse.data));
+        
+        navigate(`/instance/${subdomain}/dashboard`);
+      } catch (err) {
+        setError(err.response?.data?.error || err.message || 'Login failed after password setup');
+        setLoading(false);
+      }
+    }, 1500);
   };
 
   if (setupMode && setupData) {
