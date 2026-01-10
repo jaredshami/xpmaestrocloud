@@ -28,8 +28,8 @@ export default function InstancePortal() {
         throw new Error('Instance not found');
       }
 
-      // Try to login to instance
-      const loginResponse = await api.post(`/instances/${instance.id}/users/login`, {
+      // Try to login to instance (public endpoint - no auth needed)
+      const loginResponse = await publicApi.post(`/instances/${instance.id}/users/login`, {
         instanceId: instance.id,
         email,
         password: password || undefined, // Password not required if needs setup
@@ -119,6 +119,7 @@ export default function InstancePortal() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your email"
               />
@@ -131,6 +132,7 @@ export default function InstancePortal() {
               <input
                 type="password"
                 value={password}
+                autoComplete="current-password"
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your password (leave blank if first time)"

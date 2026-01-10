@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Lock, ArrowLeft } from 'lucide-react';
-import api from '../services/api';
+import { publicApi } from '../services/api';
 
 export default function SetupPassword({ subdomain, userId, instanceId, email, onSetupComplete }) {
   const [password, setPassword] = useState('');
@@ -31,8 +31,8 @@ export default function SetupPassword({ subdomain, userId, instanceId, email, on
     setLoading(true);
 
     try {
-      // Set password
-      await api.post(`/instances/${instanceId}/users/${userId}/set-password`, { password });
+      // Set password (public endpoint - no auth needed)
+      await publicApi.post(`/instances/${instanceId}/users/${userId}/set-password`, { password });
 
       setSuccess(true);
       
@@ -103,6 +103,7 @@ export default function SetupPassword({ subdomain, userId, instanceId, email, on
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="new-password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter a secure password"
               />
@@ -118,6 +119,7 @@ export default function SetupPassword({ subdomain, userId, instanceId, email, on
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                autoComplete="new-password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Confirm your password"
               />
