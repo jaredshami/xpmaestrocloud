@@ -56,9 +56,12 @@ app.get('/api/public/instance/:subdomain', async (req, res) => {
   }
 });
 
+// Public instance user routes (login, password setup) - no auth needed
+app.use('/api/instances/:instanceId/users', instanceUserRoutes);
+
+// Protected admin routes
 app.use('/api/clients', authenticateToken, clientRoutes);
 app.use('/api/instances', authenticateToken, instanceRoutes);
-app.use('/api/instances/:instanceId/users', instanceUserRoutes);
 app.use('/api/dashboard', authenticateToken, dashboardRoutes);
 
 // Health check
