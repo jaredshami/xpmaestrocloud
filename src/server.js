@@ -36,8 +36,15 @@ app.get('/api/public/instance/:subdomain', async (req, res) => {
   try {
     const { PrismaClient } = require('@prisma/client');
     const prisma = new PrismaClient();
+    let subdomain = req.params.subdomain;
+    
+    // If subdomain doesn't contain domain, add it
+    if (!subdomain.includes('.')) {
+      subdomain = `${subdomain}.xpmaestrocloud.com`;
+    }
+    
     const instance = await prisma.instance.findUnique({
-      where: { subdomain: req.params.subdomain },
+      where: { subdomain },
       select: { id: true, subdomain: true, environment: true },
     });
     if (!instance) {
