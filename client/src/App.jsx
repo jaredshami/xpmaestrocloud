@@ -11,10 +11,14 @@ import './styles/index.css';
 
 // Instance routes - completely separate from admin
 function InstanceRoutes() {
+  const hostname = window.location.hostname;
+  // Extract subdomain from hostname (e.g., c777351-i824650-prod from c777351-i824650-prod.xpmaestrocloud.com)
+  const subdomain = hostname.split('.')[0];
+  
   return (
     <Routes>
-      <Route path="/instance/:subdomain" element={<InstancePortal />} />
-      <Route path="/instance/:subdomain/dashboard" element={<InstanceDashboard />} />
+      <Route path="/*" element={<InstancePortal subdomain={subdomain} />} />
+      <Route path="/dashboard" element={<InstanceDashboard subdomain={subdomain} />} />
     </Routes>
   );
 }

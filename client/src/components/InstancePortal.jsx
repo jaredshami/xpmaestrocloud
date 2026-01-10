@@ -4,8 +4,9 @@ import { Lock, ArrowLeft } from 'lucide-react';
 import SetupPassword from './SetupPassword';
 import api, { publicApi } from '../services/api';
 
-export default function InstancePortal() {
-  const { subdomain } = useParams();
+export default function InstancePortal({ subdomain: propSubdomain }) {
+  const { subdomain: paramSubdomain } = useParams();
+  const subdomain = propSubdomain || paramSubdomain;
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
