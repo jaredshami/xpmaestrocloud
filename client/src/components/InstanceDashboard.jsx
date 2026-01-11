@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LogOut, Users, Settings, FileText, Plus, Trash2, Copy, X } from 'lucide-react';
 import api from '../services/api';
+import VersionManager from './VersionManager';
 
 export default function InstanceDashboard() {
   const { subdomain } = useParams();
@@ -317,6 +318,17 @@ export default function InstanceDashboard() {
               No team members yet. Add your first team member above.
             </div>
           )}
+        </div>
+
+        {/* Version Manager Section */}
+        <div className="mt-8">
+          <VersionManager 
+            instanceId={instance?.id}
+            onVersionUpdate={(updatedInstance) => {
+              setInstance(updatedInstance);
+              localStorage.setItem('currentInstance', JSON.stringify(updatedInstance));
+            }}
+          />
         </div>
       </main>
     </div>

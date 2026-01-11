@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { dashboardService, clientService, instanceService } from '../services/api';
 import { BarChart3, Users, Zap, TrendingUp } from 'lucide-react';
+import AdminVersions from './AdminVersions';
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -90,6 +91,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Version Management Section */}
+      <AdminVersions />
     </div>
   );
 }
