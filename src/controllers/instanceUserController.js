@@ -27,7 +27,18 @@ exports.loginInstanceUser = async (req, res, next) => {
       throw new AuthenticationError('Invalid credentials');
     }
 
-    // Check if user needs to set password (first time login)
+    // Check if this is first login with temp password - force password reset
+    if (user.status === 'pending') {
+      return res.status(200).json({
+        requiresPasswordSetup: true,
+        userId: user.id,
+        instanceId: user.instanceId,
+        email: user.email,
+        message: 'Please set your password to continue',
+      });
+    }
+
+    // Check if user needs to set password (passwordHash is null)
     if (!user.passwordHash) {
       return res.status(200).json({
         requiresPasswordSetup: true,
