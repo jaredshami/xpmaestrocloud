@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { LogOut, Users, Settings, FileText, Plus, Trash2 } from 'lucide-react';
+import { LogOut, Users, Settings, FileText, Plus, Trash2, Copy, X } from 'lucide-react';
 import api from '../services/api';
 
 export default function InstanceDashboard() {
@@ -13,6 +13,8 @@ export default function InstanceDashboard() {
   const [showAddUser, setShowAddUser] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserRole, setNewUserRole] = useState('editor');
+  const [showTempPassword, setShowTempPassword] = useState(false);
+  const [tempPasswordData, setTempPasswordData] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -65,13 +67,22 @@ export default function InstanceDashboard() {
       setNewUserRole('editor');
       setShowAddUser(false);
       
-      // Show temporary password
+      // Show temporary password in modal
       if (response.data.tempPassword) {
-        alert(`User added successfully!\n\nTemporary Password: ${response.data.tempPassword}\n\nPlease send this to the user. They will set their own password on first login.`);
+        setTempPasswordData({
+          email: newUserEmail,
+          password: response.data.tempPassword,
+        });
+        setShowTempPassword(true);
       }
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to add user');
     }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    alert('Copied to clipboard!');
   };
 
   const handleRemoveUser = async (userId) => {
@@ -95,6 +106,53 @@ export default function InstanceDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Temp Password Modal */}
+      {showTempPassword && tempPasswordData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full">
+            <div className="bg-green-600 px-6 py-4 flex justify-between items-center">
+              <h3 className="text-white font-bold text-lg">User Added Successfully!</h3>
+              <button
+                onClick={() => setShowTempPassword(false)}
+                className="text-white hover:bg-green-700 p-1 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-6">
+              <p className="text-gray-700 mb-4">
+                New user <span className="font-semibold">{tempPasswordData.email}</span> has been created.
+              </p>
+              <p className="text-gray-600 text-sm mb-4">
+                Share this temporary password with the user. They will set their own password on first login.
+              </p>
+              
+              <div className="bg-gray-50 p-4 rounded border-2 border-gray-200 mb-4">
+                <p className="text-xs text-gray-600 mb-2">Temporary Password:</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-lg font-mono bg-white p-2 rounded border border-gray-300">
+                    {tempPasswordData.password}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(tempPasswordData.password)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition"
+                    title="Copy password"
+                  >
+                    <Copy className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowTempPassword(false)}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded font-medium transition"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
