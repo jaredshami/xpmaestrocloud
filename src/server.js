@@ -10,6 +10,7 @@ const clientRoutes = require('./routes/clients');
 const instanceRoutes = require('./routes/instances');
 const instanceUserRoutes = require('./routes/instanceUsers');
 const dashboardRoutes = require('./routes/dashboard');
+const versionRoutes = require('./routes/versions');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -58,6 +59,9 @@ app.get('/api/public/instance/:subdomain', async (req, res) => {
 
 // Public instance user routes (login, password setup) - no auth needed
 app.use('/api/instances/:instanceId/users', instanceUserRoutes);
+
+// Public version routes (listing, downloading)
+app.use('/api/versions', versionRoutes);
 
 // Protected admin routes
 app.use('/api/clients', authenticateToken, clientRoutes);

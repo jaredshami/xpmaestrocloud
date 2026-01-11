@@ -1,0 +1,17 @@
+{
+  "latest": "v1.0",
+  "versions": [
+    {
+      "version": "v1.0",
+      "releaseDate": "2026-01-11",
+      "description": "Initial release",
+      "status": "stable",
+      "downloadUrl": "/core/versions/v1.0",
+      "changeLog": "Initial release with core engine, templates, and styling"
+    }
+  ],
+  "maintenance": {
+    "enabled": false,
+    "message": ""
+  }
+}

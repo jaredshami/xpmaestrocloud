@@ -45,12 +45,14 @@ model Instance {
   folderPath  String
   environment String    // prod, stage, dev
   status      String    @default("active") // active, inactive, suspended
+  coreVersion String    @default("latest") // Current core version (e.g., v1.0, v1.1)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   // Relations
   client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   users       InstanceUser[]
+  versionHistory VersionHistory[]
 
   @@map("instances")
   @@index([clientId])
@@ -73,4 +75,21 @@ model InstanceUser {
 
   @@unique([instanceId, email])
   @@map("instance_users")
+}
+
+model VersionHistory {
+  id            Int       @id @default(autoincrement())
+  instanceId    Int
+  fromVersion   String    // Previous version
+  toVersion     String    // New version
+  status        String    @default("completed") // pending, completed, failed, rolled_back
+  notes         String?
+  createdAt     DateTime  @default(now())
+  completedAt   DateTime?
+
+  // Relations
+  instance      Instance  @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@map("version_history")
+  @@index([instanceId])
 }
