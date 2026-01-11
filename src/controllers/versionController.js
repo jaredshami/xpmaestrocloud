@@ -51,9 +51,23 @@ exports.updateInstanceVersion = async (req, res, next) => {
   try {
     const { instanceId } = req.params;
     const { targetVersion } = req.body;
+    const instanceUserId = req.instanceUser?.id;
 
     if (!targetVersion) {
       throw new ValidationError('targetVersion is required');
+    }
+
+    // Check if user is instance admin
+    if (!instanceUserId) {
+      throw new ValidationError('User not authenticated');
+    }
+
+    const instanceUser = await prisma.instanceUser.findUnique({
+      where: { id: instanceUserId },
+    });
+
+    if (!instanceUser || instanceUser.role !== 'admin') {
+      throw new ValidationError('Only instance admins can update versions');
     }
 
     const instance = await prisma.instance.findUnique({
@@ -117,6 +131,20 @@ exports.updateInstanceVersion = async (req, res, next) => {
 exports.rollbackInstanceVersion = async (req, res, next) => {
   try {
     const { instanceId } = req.params;
+    const instanceUserId = req.instanceUser?.id;
+
+    // Check if user is instance admin
+    if (!instanceUserId) {
+      throw new ValidationError('User not authenticated');
+    }
+
+    const instanceUser = await prisma.instanceUser.findUnique({
+      where: { id: instanceUserId },
+    });
+
+    if (!instanceUser || instanceUser.role !== 'admin') {
+      throw new ValidationError('Only instance admins can rollback versions');
+    }
 
     const instance = await prisma.instance.findUnique({
       where: { id: parseInt(instanceId) },

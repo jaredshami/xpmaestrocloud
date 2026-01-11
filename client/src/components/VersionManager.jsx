@@ -12,9 +12,12 @@ export default function VersionManager({ instanceId, onVersionUpdate }) {
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     loadVersionData();
+    const storedUser = JSON.parse(localStorage.getItem('instanceUser'));
+    setUser(storedUser);
   }, [instanceId]);
 
   const loadVersionData = async () => {
@@ -139,6 +142,19 @@ export default function VersionManager({ instanceId, onVersionUpdate }) {
       </div>
 
       <div className="p-6">
+        {/* Permission Alert */}
+        {user && user.role !== 'admin' && (
+          <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-600 rounded">
+            <div className="flex items-start">
+              <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-yellow-900">Limited Access</h3>
+                <p className="text-yellow-700 text-sm">Only instance admins can update or rollback versions. Contact an admin for version changes.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Error Alert */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-600 rounded">
@@ -188,8 +204,8 @@ export default function VersionManager({ instanceId, onVersionUpdate }) {
               <select
                 value={selectedVersion}
                 onChange={(e) => setSelectedVersion(e.target.value)}
-                disabled={updating}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                disabled={updating || !user || user.role !== 'admin'}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 <option value="">Choose a version...</option>
                 {availableVersions.map((v) => (
@@ -210,7 +226,7 @@ export default function VersionManager({ instanceId, onVersionUpdate }) {
 
             <button
               onClick={handleUpdateVersion}
-              disabled={!selectedVersion || selectedVersion === currentVersion.currentVersion || updating}
+              disabled={!selectedVersion || selectedVersion === currentVersion.currentVersion || updating || !user || user.role !== 'admin'}
               className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" />
@@ -220,7 +236,7 @@ export default function VersionManager({ instanceId, onVersionUpdate }) {
         </div>
 
         {/* Rollback Section */}
-        {versionHistory.length > 1 && (
+        {versionHistory.length > 1 && user && user.role === 'admin' && (
           <div className="mb-8 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-start justify-between">
               <div>
