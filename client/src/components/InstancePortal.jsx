@@ -52,7 +52,8 @@ export default function InstancePortal({ subdomain: propSubdomain }) {
       localStorage.setItem('instanceUser', JSON.stringify(loginResponse.data.user));
       localStorage.setItem('currentInstance', JSON.stringify(instance));
 
-      navigate(`/instance/${subdomain}/dashboard`);
+      // Navigate to dashboard (on subdomain, just use /dashboard)
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Login failed');
     } finally {
@@ -83,7 +84,8 @@ export default function InstancePortal({ subdomain: propSubdomain }) {
         const instanceResponse = await publicApi.get(`/public/instance/${subdomain}`);
         localStorage.setItem('currentInstance', JSON.stringify(instanceResponse.data));
         
-        navigate(`/instance/${subdomain}/dashboard`);
+        // Navigate to dashboard (on subdomain, just use /dashboard)
+        navigate('/dashboard');
       } catch (err) {
         setError(err.response?.data?.error || err.message || 'Login failed after password setup');
         setLoading(false);
