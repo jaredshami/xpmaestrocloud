@@ -64,6 +64,11 @@ export default function InstanceDashboard() {
       setNewUserEmail('');
       setNewUserRole('editor');
       setShowAddUser(false);
+      
+      // Show temporary password
+      if (response.data.tempPassword) {
+        alert(`User added successfully!\n\nTemporary Password: ${response.data.tempPassword}\n\nPlease send this to the user. They will set their own password on first login.`);
+      }
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to add user');
     }
