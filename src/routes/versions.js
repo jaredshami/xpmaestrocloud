@@ -13,4 +13,8 @@ router.put('/:instanceId', authenticateToken, versionController.updateInstanceVe
 router.post('/:instanceId/rollback', authenticateToken, versionController.rollbackInstanceVersion);
 router.get('/:instanceId/history', authenticateToken, versionController.getInstanceVersionHistory);
 
+// Admin deployment endpoints
+router.get('/deployment-status', authenticateToken, versionController.checkDeploymentStatus);
+router.post('/deploy', authenticateToken, versionController.deployVersion);
+
 module.exports = router;

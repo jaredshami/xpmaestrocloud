@@ -1,7 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
+const { promisify } = require('util');
 const { ValidationError, NotFoundError } = require('../utils/errors');
+
+const execAsync = promisify(exec);
 
 const prisma = new PrismaClient();
 const CORE_DIR = path.join(__dirname, '../../core');
@@ -251,3 +255,249 @@ exports.getCoreFile = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.checkDeploymentStatus = async (req, res, next) => {
+  try {
+    const manifestPath = path.join(CORE_DIR, 'manifests.json');
+    
+    if (!fs.existsSync(manifestPath)) {
+      throw new NotFoundError('Manifest file not found');
+    }
+
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    const lastDeployed = manifest.lastDeployed || null;
+    
+    // Get current manifest hash from git
+    try {
+      const gitDir = path.join(__dirname, '../../..');
+      const { stdout: gitHash } = await execAsync(
+        `cd "${gitDir}" && git log -1 --pretty=format:"%H" -- core/manifests.json`,
+        { maxBuffer: 10 * 1024 * 1024 }
+      );
+      
+      const manifestChanged = !lastDeployed || lastDeployed.gitHash !== gitHash.trim();
+      
+      res.json({
+        hasChanges: manifestChanged,
+        lastDeployed,
+        currentGitHash: gitHash.trim(),
+        currentVersion: manifest.latest,
+        versions: manifest.versions.slice(0, 3), // Last 3 versions
+      });
+    } catch (gitError) {
+      res.json({
+        hasChanges: true,
+        lastDeployed,
+        currentVersion: manifest.latest,
+        versions: manifest.versions.slice(0, 3),
+        warning: 'Could not determine Git status',
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deployVersion = async (req, res, next) => {
+  try {
+    const { versionNumber, description } = req.body;
+    const adminId = req.user?.id;
+
+    if (!adminId) {
+      throw new ValidationError('User not authenticated');
+    }
+
+    if (!versionNumber || !description) {
+      throw new ValidationError('versionNumber and description are required');
+    }
+
+    // Validate version format (e.g., 1.0.0, 1.1.0)
+    if (!/^\d+\.\d+\.\d+$/.test(versionNumber)) {
+      throw new ValidationError('Version must be in format X.Y.Z (e.g., 1.0.0)');
+    }
+
+    const manifestPath = path.join(CORE_DIR, 'manifests.json');
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+
+    // Check if version already exists
+    if (manifest.versions.some(v => v.version === versionNumber)) {
+      throw new ValidationError(`Version ${versionNumber} already exists`);
+    }
+
+    res.json({
+      status: 'deploying',
+      message: 'Starting deployment...',
+      steps: [
+        { step: 1, name: 'Pulling core files from GitHub', status: 'in-progress' },
+        { step: 2, name: 'Comparing manifests', status: 'pending' },
+        { step: 3, name: 'Creating version folder', status: 'pending' },
+        { step: 4, name: 'Updating version registry', status: 'pending' },
+      ],
+    });
+
+    // Process deployment asynchronously
+    deploymentWorker(versionNumber, description, adminId);
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Worker function to handle deployment in background
+async function deploymentWorker(versionNumber, description, adminId) {
+  try {
+    const gitDir = path.join(__dirname, '../../..');
+    const manifestPath = path.join(CORE_DIR, 'manifests.json');
+    const versionDir = path.join(CORE_DIR, 'versions', `v${versionNumber}`);
+
+    // Step 1: Pull core files from GitHub
+    console.log(`[Deployment] Pulling core files for version ${versionNumber}`);
+    try {
+      await execAsync(`cd "${gitDir}" && git pull origin master`, {
+        maxBuffer: 50 * 1024 * 1024,
+      });
+    } catch (pullError) {
+      console.error(`[Deployment] Git pull error:`, pullError.message);
+      throw new Error(`Failed to pull from GitHub: ${pullError.message}`);
+    }
+
+    // Step 2: Create version directory
+    console.log(`[Deployment] Creating version directory: ${versionDir}`);
+    if (!fs.existsSync(versionDir)) {
+      fs.mkdirSync(versionDir, { recursive: true });
+    }
+
+    // Step 3: Copy core files to version folder
+    const srcCoreDir = path.join(gitDir, 'core');
+    const filesToCopy = [
+      'versions/v1.0/templates',
+      'versions/v1.0/lib',
+      'versions/v1.0/assets',
+      'versions/v1.0/config',
+    ];
+
+    for (const file of filesToCopy) {
+      const src = path.join(srcCoreDir, file);
+      const dest = path.join(versionDir, path.basename(file));
+      
+      if (fs.existsSync(src)) {
+        copyDirRecursive(src, dest);
+      }
+    }
+
+    // Step 4: Create manifest for this version
+    const versionManifestPath = path.join(versionDir, 'manifest.json');
+    const versionManifest = {
+      version: versionNumber,
+      description,
+      releaseDate: new Date().toISOString(),
+      createdBy: adminId,
+      files: getFileManifest(versionDir),
+    };
+    fs.writeFileSync(versionManifestPath, JSON.stringify(versionManifest, null, 2));
+
+    // Step 5: Update main manifests.json
+    const currentManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    const { stdout: gitHash } = await execAsync(
+      `cd "${gitDir}" && git log -1 --pretty=format:"%H" -- core/manifests.json`
+    );
+
+    const updatedManifest = {
+      ...currentManifest,
+      latest: versionNumber,
+      lastDeployed: {
+        version: versionNumber,
+        date: new Date().toISOString(),
+        gitHash: gitHash.trim(),
+      },
+      versions: [
+        {
+          version: versionNumber,
+          description,
+          status: 'latest',
+          releaseDate: new Date().toISOString(),
+          stats: {
+            instancesUsing: 0,
+            fileCount: Object.keys(versionManifest.files).length,
+            size: getDirSize(versionDir),
+          },
+        },
+        ...currentManifest.versions,
+      ],
+    };
+
+    fs.writeFileSync(manifestPath, JSON.stringify(updatedManifest, null, 2));
+
+    console.log(`[Deployment] Version ${versionNumber} deployed successfully`);
+  } catch (error) {
+    console.error(`[Deployment] Error deploying version:`, error.message);
+  }
+}
+
+function copyDirRecursive(src, dest) {
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+
+  const files = fs.readdirSync(src);
+  files.forEach(file => {
+    const srcPath = path.join(src, file);
+    const destPath = path.join(dest, file);
+
+    if (fs.statSync(srcPath).isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  });
+}
+
+function getFileManifest(dir) {
+  const files = {};
+  
+  function walk(currentPath, relativePath = '') {
+    const entries = fs.readdirSync(currentPath);
+    
+    entries.forEach(entry => {
+      const fullPath = path.join(currentPath, entry);
+      const relPath = path.join(relativePath, entry);
+      
+      if (fs.statSync(fullPath).isDirectory()) {
+        walk(fullPath, relPath);
+      } else {
+        const content = fs.readFileSync(fullPath, 'utf-8');
+        const crypto = require('crypto');
+        const hash = crypto.createHash('sha256').update(content).digest('hex');
+        files[relPath] = {
+          hash,
+          size: fs.statSync(fullPath).size,
+        };
+      }
+    });
+  }
+
+  walk(dir);
+  return files;
+}
+
+function getDirSize(dir) {
+  let size = 0;
+  
+  function walk(currentPath) {
+    const entries = fs.readdirSync(currentPath);
+    
+    entries.forEach(entry => {
+      const fullPath = path.join(currentPath, entry);
+      const stat = fs.statSync(fullPath);
+      
+      if (stat.isDirectory()) {
+        walk(fullPath);
+      } else {
+        size += stat.size;
+      }
+    });
+  }
+
+  walk(dir);
+  return size;
+}
