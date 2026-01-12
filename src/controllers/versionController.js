@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const { promisify } = require('util');
+const https = require('https');
 const { ValidationError, NotFoundError } = require('../utils/errors');
 
 const execAsync = promisify(exec);
@@ -256,46 +257,70 @@ exports.getCoreFile = async (req, res, next) => {
   }
 };
 
+// Helper function to fetch manifest from GitHub
+const fetchGitHubManifest = () => {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'raw.githubusercontent.com',
+      path: '/jaredshami/xpmaestrocloud/master/core/manifests.json',
+      method: 'GET',
+      headers: {
+        'User-Agent': 'xpmaestrocloud-server',
+      },
+    };
+
+    https.get(options, (res) => {
+      let data = '';
+      
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      res.on('end', () => {
+        if (res.statusCode === 200) {
+          try {
+            const manifest = JSON.parse(data);
+            resolve(manifest);
+          } catch (e) {
+            reject(new Error('Failed to parse GitHub manifest: ' + e.message));
+          }
+        } else {
+          reject(new Error(`GitHub returned status ${res.statusCode}`));
+        }
+      });
+    }).on('error', reject);
+  });
+};
+
 exports.checkDeploymentStatus = async (req, res, next) => {
   try {
-    const manifestPath = path.join(CORE_DIR, 'manifests.json');
-    
-    if (!fs.existsSync(manifestPath)) {
-      throw new NotFoundError('Manifest file not found');
+    // Fetch from GitHub instead of local file
+    let gitHubManifest;
+    try {
+      gitHubManifest = await fetchGitHubManifest();
+      console.log('[Deployment] Successfully fetched manifest from GitHub');
+      console.log('[Deployment] Latest version from GitHub:', gitHubManifest.latest);
+    } catch (githubError) {
+      console.error('[Deployment] GitHub fetch failed:', githubError.message);
+      // Fallback to local manifest if GitHub is unavailable
+      const manifestPath = path.join(CORE_DIR, 'manifests.json');
+      if (fs.existsSync(manifestPath)) {
+        gitHubManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+        console.log('[Deployment] Using fallback local manifest');
+      } else {
+        throw githubError;
+      }
     }
 
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-    const lastDeployed = manifest.lastDeployed || null;
+    const lastDeployed = gitHubManifest.lastDeployed || null;
     
-    // Get current manifest hash from git
-    try {
-      // Path from controllers/versionController.js -> src -> . -> project root
-      const projectRoot = path.join(__dirname, '../../');
-      const { stdout: gitHash } = await execAsync(
-        `cd "${projectRoot}" && git log -1 --pretty=format:"%H" -- core/manifests.json 2>&1`,
-        { maxBuffer: 10 * 1024 * 1024 }
-      );
-      
-      const manifestChanged = !lastDeployed || lastDeployed.gitHash !== gitHash.trim();
-      
-      res.json({
-        hasChanges: manifestChanged,
-        lastDeployed,
-        currentGitHash: gitHash.trim(),
-        currentVersion: manifest.latest,
-        versions: manifest.versions.slice(0, 3), // Last 3 versions
-      });
-    } catch (gitError) {
-      console.error('[Deployment] Git error:', gitError.message);
-      // Return that changes exist if we can't determine git status
-      res.json({
-        hasChanges: true,
-        lastDeployed,
-        currentVersion: manifest.latest,
-        versions: manifest.versions.slice(0, 3),
-        warning: 'Could not determine Git status - proceeding with deployment',
-      });
-    }
+    res.json({
+      hasChanges: true,
+      lastDeployed,
+      currentVersion: gitHubManifest.latest,
+      versions: gitHubManifest.versions.slice(0, 5), // Latest 5 versions available
+      source: 'github',
+    });
   } catch (error) {
     next(error);
   }
