@@ -502,6 +502,54 @@ function getDirSize(dir) {
   return size;
 }
 
+exports.markVersionAsLatest = async (req, res, next) => {
+  try {
+    const { version } = req.params;
+    const adminId = req.user?.id;
+
+    if (!adminId) {
+      throw new ValidationError('User not authenticated');
+    }
+
+    const manifestPath = path.join(CORE_DIR, 'manifests.json');
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+
+    // Check if version exists
+    const versionExists = manifest.versions.some(v => v.version === version);
+    if (!versionExists) {
+      throw new NotFoundError(`Version ${version} not found`);
+    }
+
+    // Check if it's already the latest
+    if (manifest.latest === version) {
+      return res.json({
+        success: true,
+        message: `Version ${version} is already the latest`,
+      });
+    }
+
+    // Update manifest to mark this version as latest
+    const updatedManifest = {
+      ...manifest,
+      latest: version,
+      versions: manifest.versions.map(v => ({
+        ...v,
+        status: v.version === version ? 'latest' : (v.status === 'latest' ? 'stable' : v.status),
+      })),
+    };
+
+    fs.writeFileSync(manifestPath, JSON.stringify(updatedManifest, null, 2));
+
+    res.json({
+      success: true,
+      message: `Version ${version} marked as latest`,
+      latestVersion: version,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.deleteVersion = async (req, res, next) => {
   try {
     const { version } = req.params;

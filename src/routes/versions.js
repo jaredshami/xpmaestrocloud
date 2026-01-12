@@ -16,6 +16,7 @@ router.get('/:instanceId/history', authenticateToken, versionController.getInsta
 // Admin deployment endpoints
 router.get('/deployment-status', authenticateToken, versionController.checkDeploymentStatus);
 router.post('/deploy', authenticateToken, versionController.deployVersion);
+router.put('/:version/latest', authenticateToken, versionController.markVersionAsLatest);
 router.delete('/:version', authenticateToken, versionController.deleteVersion);
 
 module.exports = router;
