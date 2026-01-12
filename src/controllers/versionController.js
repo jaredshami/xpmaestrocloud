@@ -294,7 +294,7 @@ const fetchGitHubManifest = () => {
 
 exports.checkDeploymentStatus = async (req, res, next) => {
   try {
-    // Fetch from GitHub instead of local file
+    // Fetch GitHub manifest
     let gitHubManifest;
     try {
       gitHubManifest = await fetchGitHubManifest();
@@ -302,24 +302,37 @@ exports.checkDeploymentStatus = async (req, res, next) => {
       console.log('[Deployment] Latest version from GitHub:', gitHubManifest.latest);
     } catch (githubError) {
       console.error('[Deployment] GitHub fetch failed:', githubError.message);
-      // Fallback to local manifest if GitHub is unavailable
-      const manifestPath = path.join(CORE_DIR, 'manifests.json');
-      if (fs.existsSync(manifestPath)) {
-        gitHubManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-        console.log('[Deployment] Using fallback local manifest');
-      } else {
-        throw githubError;
-      }
+      throw githubError;
     }
 
-    const lastDeployed = gitHubManifest.lastDeployed || null;
+    // Fetch VPS manifest
+    const manifestPath = path.join(CORE_DIR, 'manifests.json');
+    if (!fs.existsSync(manifestPath)) {
+      throw new NotFoundError('VPS manifest not found');
+    }
     
+    const vpsManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    console.log('[Deployment] VPS latest version:', vpsManifest.latest);
+
+    // Compare: is there a new version in GitHub not on VPS?
+    const gitHubLatestVersion = gitHubManifest.latest;
+    const vpsLatestVersion = vpsManifest.latest;
+    
+    const hasNewVersion = gitHubLatestVersion !== vpsLatestVersion;
+    console.log('[Deployment] New version available?', hasNewVersion, `(GitHub: ${gitHubLatestVersion}, VPS: ${vpsLatestVersion})`);
+
+    // Find the new version info in GitHub manifest
+    let newVersionInfo = null;
+    if (hasNewVersion) {
+      newVersionInfo = gitHubManifest.versions.find(v => v.version === gitHubLatestVersion);
+    }
+
     res.json({
-      hasChanges: true,
-      lastDeployed,
-      currentVersion: gitHubManifest.latest,
-      versions: gitHubManifest.versions.slice(0, 5), // Latest 5 versions available
-      source: 'github',
+      hasNewVersion,
+      gitHubLatest: gitHubLatestVersion,
+      vpsLatest: vpsLatestVersion,
+      newVersionInfo: newVersionInfo, // Contains version, description, etc if new version exists
+      allVersionsOnGitHub: gitHubManifest.versions,
     });
   } catch (error) {
     next(error);

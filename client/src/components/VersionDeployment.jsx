@@ -6,12 +6,10 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
   const [deploymentStatus, setDeploymentStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deploying, setDeploying] = useState(false);
-  const [versionNumber, setVersionNumber] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [deploymentSteps, setDeploymentSteps] = useState([]);
-  const [latestAvailableVersion, setLatestAvailableVersion] = useState(null);
 
   useEffect(() => {
     checkDeploymentStatus();
@@ -27,13 +25,10 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
       });
 
       setDeploymentStatus(response.data);
-
-      // Extract latest available version from manifest
-      if (response.data.hasChanges && response.data.versions && response.data.versions.length > 0) {
-        const latestVersion = response.data.versions[0];
-        setLatestAvailableVersion(latestVersion);
-        setVersionNumber(latestVersion.version);
-        setDescription(latestVersion.description || '');
+      
+      // Auto-populate description if new version exists
+      if (response.data.hasNewVersion && response.data.newVersionInfo) {
+        setDescription(response.data.newVersionInfo.description || '');
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to check deployment status');
@@ -45,8 +40,8 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
   const handleStartDeployment = async (e) => {
     e.preventDefault();
 
-    if (!versionNumber || !description.trim()) {
-      setError('Please fill in all fields');
+    if (!deploymentStatus?.hasNewVersion) {
+      setError('No new version available to deploy');
       return;
     }
 
@@ -54,6 +49,8 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
       setDeploying(true);
       setError('');
       setSuccess('');
+
+      const versionNumber = deploymentStatus.newVersionInfo.version;
 
       // Initialize deployment steps
       const steps = [
@@ -169,79 +166,72 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
           )}
 
           {/* Deployment Status Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className={`border rounded-lg p-4 ${deploymentStatus?.hasNewVersion ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
             <div className="flex items-start gap-3">
-              <GitBranch className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <GitBranch className={`w-5 h-5 mt-0.5 flex-shrink-0 ${deploymentStatus?.hasNewVersion ? 'text-green-600' : 'text-yellow-600'}`} />
               <div>
-                <h3 className="font-semibold text-blue-900 mb-2">GitHub Status</h3>
-                <div className="space-y-1 text-sm text-blue-800">
-                  <p><span className="font-medium">Current Version:</span> {deploymentStatus?.currentVersion}</p>
-                  <p><span className="font-medium">Manifest Changes:</span> {deploymentStatus?.hasChanges ? '✓ Found' : '✗ No changes'}</p>
-                  {deploymentStatus?.lastDeployed && (
-                    <p><span className="font-medium">Last Deployed:</span> {new Date(deploymentStatus.lastDeployed.date).toLocaleString()}</p>
+                <h3 className={`font-semibold mb-2 ${deploymentStatus?.hasNewVersion ? 'text-green-900' : 'text-yellow-900'}`}>
+                  {deploymentStatus?.hasNewVersion ? 'New Version Available' : 'No New Version'}
+                </h3>
+                <div className={`space-y-1 text-sm ${deploymentStatus?.hasNewVersion ? 'text-green-800' : 'text-yellow-800'}`}>
+                  <p><span className="font-medium">GitHub Latest:</span> {deploymentStatus?.gitHubLatest}</p>
+                  <p><span className="font-medium">VPS Latest:</span> {deploymentStatus?.vpsLatest}</p>
+                  {deploymentStatus?.hasNewVersion ? (
+                    <p className="font-semibold text-green-700 mt-2">✓ Ready to deploy {deploymentStatus?.gitHubLatest}</p>
+                  ) : (
+                    <p className="text-yellow-700 mt-2">Versions are in sync</p>
                   )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Deployment Form */}
-          {!deploying && deploymentSteps.length === 0 && (
+          {/* Deployment Form - Only show if new version exists */}
+          {!deploying && deploymentSteps.length === 0 && deploymentStatus?.hasNewVersion && (
             <form onSubmit={handleStartDeployment} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Version Number (Auto-detected from manifest)
+                  Version Number (Auto-detected)
                 </label>
                 <input
                   type="text"
-                  value={versionNumber}
+                  value={deploymentStatus?.newVersionInfo?.version || ''}
                   disabled
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-mono font-semibold cursor-not-allowed"
                 />
-                {latestAvailableVersion && (
-                  <p className="text-xs text-gray-600 mt-1">
-                    From GitHub: <span className="font-semibold">{latestAvailableVersion.version}</span>
-                  </p>
-                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Release Description (Auto-populated from manifest)
+                  Release Description (from GitHub manifest)
                 </label>
                 <textarea
                   value={description}
-                  disabled
+                  onChange={(e) => setDescription(e.target.value)}
                   rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                  placeholder="You can modify the description if needed"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
-              {deploymentStatus?.hasChanges && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-900">
-                    ✓ Changes detected in master branch. Ready to deploy {versionNumber}.
-                  </p>
-                </div>
-              )}
-
-              {!deploymentStatus?.hasChanges && (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-900">
-                    ⚠ No changes detected in manifest.json since last deployment.
-                  </p>
-                </div>
-              )}
-
               <button
                 type="submit"
-                disabled={deploying || !versionNumber}
-                className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
+                disabled={deploying}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
               >
                 <GitBranch className="w-5 h-5" />
-                {deploying ? 'Deploying...' : 'Deploy Now'}
+                {deploying ? 'Deploying...' : `Deploy ${deploymentStatus?.gitHubLatest}`}
               </button>
             </form>
+          )}
+
+          {/* No New Version Message */}
+          {!deploying && deploymentSteps.length === 0 && !deploymentStatus?.hasNewVersion && (
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+              <p className="text-gray-600">
+                VPS is up to date with GitHub. No new versions to deploy.
+              </p>
+            </div>
           )}
 
           {/* Deployment Steps */}
