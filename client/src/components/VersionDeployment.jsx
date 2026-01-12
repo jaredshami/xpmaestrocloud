@@ -6,6 +6,7 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
   const [deploymentStatus, setDeploymentStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deploying, setDeploying] = useState(false);
+  const [selectedVersion, setSelectedVersion] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -25,11 +26,6 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
       });
 
       setDeploymentStatus(response.data);
-      
-      // Auto-populate description if new version exists
-      if (response.data.hasNewVersion && response.data.newVersionInfo) {
-        setDescription(response.data.newVersionInfo.description || '');
-      }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to check deployment status');
     } finally {
@@ -37,11 +33,31 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
     }
   };
 
+  // Get available new versions (versions in GitHub that are not on VPS)
+  const getAvailableNewVersions = () => {
+    if (!deploymentStatus?.allVersionsOnGitHub || !deploymentStatus?.vpsLatest) {
+      return [];
+    }
+    
+    // Get all versions from GitHub that are newer than VPS latest
+    return deploymentStatus.allVersionsOnGitHub;
+  };
+
+  const handleVersionSelect = (versionNumber) => {
+    setSelectedVersion(versionNumber);
+    
+    // Find and auto-populate description for selected version
+    const versionInfo = deploymentStatus?.allVersionsOnGitHub?.find(v => v.version === versionNumber);
+    if (versionInfo) {
+      setDescription(versionInfo.description || '');
+    }
+  };
+
   const handleStartDeployment = async (e) => {
     e.preventDefault();
 
-    if (!deploymentStatus?.hasNewVersion) {
-      setError('No new version available to deploy');
+    if (!selectedVersion) {
+      setError('Please select a version to deploy');
       return;
     }
 
@@ -50,7 +66,7 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
       setError('');
       setSuccess('');
 
-      const versionNumber = deploymentStatus.newVersionInfo.version;
+      const versionNumber = selectedVersion;
 
       // Initialize deployment steps
       const steps = [
@@ -191,36 +207,42 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
             <form onSubmit={handleStartDeployment} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Version Number (Auto-detected)
+                  Select Version to Deploy
                 </label>
-                <input
-                  type="text"
-                  value={deploymentStatus?.newVersionInfo?.version || ''}
-                  disabled
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-mono font-semibold cursor-not-allowed"
-                />
+                <select
+                  value={selectedVersion}
+                  onChange={(e) => handleVersionSelect(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono font-semibold"
+                >
+                  <option value="">-- Choose a version --</option>
+                  {getAvailableNewVersions().map((version) => (
+                    <option key={version.version} value={version.version}>
+                      {version.version} - {version.description}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Release Description (from GitHub manifest)
+                  Release Description
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows="4"
-                  placeholder="You can modify the description if needed"
+                  placeholder="Description from manifest"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={deploying}
+                disabled={deploying || !selectedVersion}
                 className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
               >
                 <GitBranch className="w-5 h-5" />
-                {deploying ? 'Deploying...' : `Deploy ${deploymentStatus?.gitHubLatest}`}
+                {deploying ? 'Deploying...' : `Deploy ${selectedVersion}`}
               </button>
             </form>
           )}
