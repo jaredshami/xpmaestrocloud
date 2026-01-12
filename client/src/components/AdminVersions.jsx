@@ -236,8 +236,6 @@ export default function AdminVersions() {
           onDeploymentComplete={handleDeploymentComplete}
         />
       )}
-        </div>
-      </div>
     </div>
   );
 }
