@@ -269,9 +269,10 @@ exports.checkDeploymentStatus = async (req, res, next) => {
     
     // Get current manifest hash from git
     try {
-      const gitDir = path.join(__dirname, '../../..');
+      // Path from controllers/versionController.js -> src -> . -> project root
+      const projectRoot = path.join(__dirname, '../../');
       const { stdout: gitHash } = await execAsync(
-        `cd "${gitDir}" && git log -1 --pretty=format:"%H" -- core/manifests.json`,
+        `cd "${projectRoot}" && git log -1 --pretty=format:"%H" -- core/manifests.json 2>&1`,
         { maxBuffer: 10 * 1024 * 1024 }
       );
       
@@ -285,12 +286,14 @@ exports.checkDeploymentStatus = async (req, res, next) => {
         versions: manifest.versions.slice(0, 3), // Last 3 versions
       });
     } catch (gitError) {
+      console.error('[Deployment] Git error:', gitError.message);
+      // Return that changes exist if we can't determine git status
       res.json({
         hasChanges: true,
         lastDeployed,
         currentVersion: manifest.latest,
         versions: manifest.versions.slice(0, 3),
-        warning: 'Could not determine Git status',
+        warning: 'Could not determine Git status - proceeding with deployment',
       });
     }
   } catch (error) {
