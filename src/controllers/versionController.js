@@ -501,3 +501,58 @@ function getDirSize(dir) {
   walk(dir);
   return size;
 }
+
+exports.deleteVersion = async (req, res, next) => {
+  try {
+    const { version } = req.params;
+    const adminId = req.user?.id;
+
+    if (!adminId) {
+      throw new ValidationError('User not authenticated');
+    }
+
+    const manifestPath = path.join(CORE_DIR, 'manifests.json');
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+
+    // Check if version exists
+    const versionExists = manifest.versions.some(v => v.version === version);
+    if (!versionExists) {
+      throw new NotFoundError(`Version ${version} not found`);
+    }
+
+    // Prevent deleting the latest version
+    if (manifest.latest === version) {
+      throw new ValidationError('Cannot delete the latest version. Mark another version as latest first.');
+    }
+
+    // Check if any instances are using this version
+    const instancesUsingVersion = await prisma.instance.count({
+      where: { coreVersion: version },
+    });
+
+    if (instancesUsingVersion > 0) {
+      throw new ValidationError(`Cannot delete version ${version}. ${instancesUsingVersion} instance(s) are using it. Migrate instances to another version first.`);
+    }
+
+    // Remove version folder
+    const versionDir = path.join(CORE_DIR, 'versions', `v${version}`);
+    if (fs.existsSync(versionDir)) {
+      fs.rmSync(versionDir, { recursive: true, force: true });
+    }
+
+    // Update manifest
+    const updatedManifest = {
+      ...manifest,
+      versions: manifest.versions.filter(v => v.version !== version),
+    };
+
+    fs.writeFileSync(manifestPath, JSON.stringify(updatedManifest, null, 2));
+
+    res.json({
+      success: true,
+      message: `Version ${version} deleted successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
