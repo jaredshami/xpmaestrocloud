@@ -7,15 +7,15 @@ const authenticateToken = require('../middleware/auth');
 router.get('/available', versionController.getAvailableVersions);
 router.get('/core/:version/:filepath', versionController.getCoreFile);
 
-// Protected endpoints - require authentication
+// Admin deployment endpoints (must come BEFORE /:instanceId routes)
+router.get('/deployment-status', authenticateToken, versionController.checkDeploymentStatus);
+router.post('/deploy', authenticateToken, versionController.deployVersion);
+
+// Protected endpoints - require authentication (generic :id routes go LAST)
 router.get('/:instanceId', authenticateToken, versionController.getInstanceVersion);
 router.put('/:instanceId', authenticateToken, versionController.updateInstanceVersion);
 router.post('/:instanceId/rollback', authenticateToken, versionController.rollbackInstanceVersion);
 router.get('/:instanceId/history', authenticateToken, versionController.getInstanceVersionHistory);
-
-// Admin deployment endpoints
-router.get('/deployment-status', authenticateToken, versionController.checkDeploymentStatus);
-router.post('/deploy', authenticateToken, versionController.deployVersion);
 router.put('/:version/latest', authenticateToken, versionController.markVersionAsLatest);
 router.delete('/:version', authenticateToken, versionController.deleteVersion);
 

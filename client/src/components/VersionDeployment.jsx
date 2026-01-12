@@ -11,6 +11,7 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [deploymentSteps, setDeploymentSteps] = useState([]);
+  const [latestAvailableVersion, setLatestAvailableVersion] = useState(null);
 
   useEffect(() => {
     checkDeploymentStatus();
@@ -27,11 +28,12 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
 
       setDeploymentStatus(response.data);
 
-      // Auto-increment version number
-      if (response.data.currentVersion) {
-        const [major, minor, patch] = response.data.currentVersion.split('.');
-        const newPatch = parseInt(patch) + 1;
-        setVersionNumber(`${major}.${minor}.${newPatch}`);
+      // Extract latest available version from manifest
+      if (response.data.hasChanges && response.data.versions && response.data.versions.length > 0) {
+        const latestVersion = response.data.versions[0];
+        setLatestAvailableVersion(latestVersion);
+        setVersionNumber(latestVersion.version);
+        setDescription(latestVersion.description || '');
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to check deployment status');
@@ -44,12 +46,7 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
     e.preventDefault();
 
     if (!versionNumber || !description.trim()) {
-      setError('Please fill in version number and description');
-      return;
-    }
-
-    if (!/^\d+\.\d+\.\d+$/.test(versionNumber)) {
-      setError('Version must be in format X.Y.Z (e.g., 1.0.1)');
+      setError('Please fill in all fields');
       return;
     }
 
@@ -193,37 +190,37 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
             <form onSubmit={handleStartDeployment} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Version Number
+                  Version Number (Auto-detected from manifest)
                 </label>
                 <input
                   type="text"
                   value={versionNumber}
-                  onChange={(e) => setVersionNumber(e.target.value)}
-                  placeholder="e.g., 1.0.1"
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent font-mono"
+                  disabled
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 font-mono font-semibold cursor-not-allowed"
                 />
-                <p className="text-xs text-gray-600 mt-1">Format: MAJOR.MINOR.PATCH</p>
+                {latestAvailableVersion && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    From GitHub: <span className="font-semibold">{latestAvailableVersion.version}</span>
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Release Description
+                  Release Description (Auto-populated from manifest)
                 </label>
                 <textarea
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="What's new in this version? What bugs were fixed? What features were added?"
-                  required
-                  rows="5"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  disabled
+                  rows="4"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
                 />
               </div>
 
               {deploymentStatus?.hasChanges && (
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-sm text-green-900">
-                    ✓ Master branch has changes. Ready to deploy.
+                    ✓ Changes detected in master branch. Ready to deploy {versionNumber}.
                   </p>
                 </div>
               )}
@@ -231,18 +228,18 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
               {!deploymentStatus?.hasChanges && (
                 <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-sm text-yellow-900">
-                    ⚠ No changes detected in manifest.json since last deployment. Deploy anyway?
+                    ⚠ No changes detected in manifest.json since last deployment.
                   </p>
                 </div>
               )}
 
               <button
                 type="submit"
-                disabled={deploying}
+                disabled={deploying || !versionNumber}
                 className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
               >
                 <GitBranch className="w-5 h-5" />
-                {deploying ? 'Deploying...' : 'Start Deployment'}
+                {deploying ? 'Deploying...' : 'Deploy Now'}
               </button>
             </form>
           )}
