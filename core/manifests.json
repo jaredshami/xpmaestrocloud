@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.3",
+  "latest": "v1.0.4",
   "versions": [
+    {
+      "version": "v1.0.4",
+      "releaseDate": "2026-01-12",
+      "description": "Security patches and code hardening",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.4",
+      "changeLog": "- Applied security patches\n- Hardened core engine against edge cases\n- Improved input validation\n- Enhanced error logging"
+    },
     {
       "version": "v1.0.3",
       "releaseDate": "2026-01-12",
       "description": "Performance optimizations and bug fixes",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.3",
       "changeLog": "- Optimized core engine performance\n- Fixed memory leaks in helper functions\n- Improved template rendering speed\n- Enhanced error handling in core scripts"
     },
