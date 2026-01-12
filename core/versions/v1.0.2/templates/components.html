@@ -1,0 +1,24 @@
+<!-- Reusable Components -->
+
+<!-- Button Component -->
+<template id="btn-component">
+  <button class="btn btn-{{ type }}">{{ text }}</button>
+</template>
+
+<!-- Card Component -->
+<template id="card-component">
+  <div class="card">
+    <div class="card-header">{{ title }}</div>
+    <div class="card-body">{{ content }}</div>
+  </div>
+</template>
+
+<!-- Form Component -->
+<template id="form-component">
+  <form class="form" data-form="{{ name }}">
+    <div class="form-group">
+      <label for="{{ fieldId }}">{{ label }}</label>
+      <input type="{{ type }}" id="{{ fieldId }}" name="{{ fieldName }}" required>
+    </div>
+  </form>
+</template>
