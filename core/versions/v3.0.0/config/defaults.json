@@ -1,0 +1,9 @@
+{
+  "version": "3.0.0",
+  "debug": false,
+  "logging": "info",
+  "cache": true,
+  "cacheTTL": 7200,
+  "performanceMode": true,
+  "enableMetrics": true
+}

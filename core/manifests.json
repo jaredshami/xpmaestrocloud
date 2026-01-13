@@ -1,13 +1,21 @@
 {
-  "latest": "v2.0.0",
+  "latest": "v3.0.0",
   "versions": [
+    {
+      "version": "v3.0.0",
+      "releaseDate": "2026-01-12",
+      "description": "Major version 3.0.0 with performance optimizations",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v3.0.0",
+      "changeLog": "- Performance optimizations\n- Request throttling\n- Auto-scaling support\n- Performance metrics\n- Enhanced caching strategy"
+    },
     {
       "version": "v2.0.0",
       "releaseDate": "2026-01-12",
       "description": "Major version 2.0.0 with comprehensive features",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v2.0.0",
-      "changeLog": "- New plugin system\n- Enhanced state management\n- 28 new files across multiple categories\n- Better error handling\n- Improved caching"
+      "changeLog": "- New plugin system\n- Enhanced state management\n- 28 new files across multiple categories"
     },
     {
       "version": "v1.0.5",
