@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.3",
+  "latest": "v1.0.4",
   "versions": [
+    {
+      "version": "v1.0.4",
+      "releaseDate": "2026-01-12",
+      "description": "Testing manifest status fix",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.4",
+      "changeLog": "- Testing manifest status updates\n- Deployment process verification"
+    },
     {
       "version": "v1.0.3",
       "releaseDate": "2026-01-13",
       "description": "Advanced features and optimization",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.3",
       "changeLog": "- Advanced feature set\n- System optimization\n- Enhanced performance\n- Improved reliability"
     },
