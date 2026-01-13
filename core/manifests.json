@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.2",
+  "latest": "v1.0.3",
   "versions": [
+    {
+      "version": "v1.0.3",
+      "releaseDate": "2026-01-13",
+      "description": "Advanced features and optimization",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.3",
+      "changeLog": "- Advanced feature set\n- System optimization\n- Enhanced performance\n- Improved reliability"
+    },
     {
       "version": "v1.0.2",
       "releaseDate": "2026-01-13",
       "description": "New features and improvements",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.2",
       "changeLog": "- Added new features\n- Performance improvements\n- Bug fixes\n- Enhanced stability"
     },
