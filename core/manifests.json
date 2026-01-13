@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.6",
+  "latest": "v1.0.7",
   "versions": [
+    {
+      "version": "v1.0.7",
+      "releaseDate": "2026-01-12",
+      "description": "True deployment test with all fixes",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.7",
+      "changeLog": "- Complete test of deployment process\n- All files should be copied correctly\n- Proper version naming without extra v"
+    },
     {
       "version": "v1.0.6",
       "releaseDate": "2026-01-12",
       "description": "Final testing version",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.6",
       "changeLog": "- Final version for comprehensive testing\n- Full deployment workflow verification"
     },
