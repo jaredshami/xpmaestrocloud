@@ -262,15 +262,17 @@ const fetchGitHubManifest = () => {
   return new Promise((resolve, reject) => {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 15);
+    // Use GitHub API instead of raw.githubusercontent.com to avoid aggressive caching
     const options = {
-      hostname: 'raw.githubusercontent.com',
-      path: `/jaredshami/xpmaestrocloud/master/core/manifests.json?t=${timestamp}&r=${random}`,
+      hostname: 'api.github.com',
+      path: `/repos/jaredshami/xpmaestrocloud/contents/core/manifests.json?t=${timestamp}&r=${random}`,
       method: 'GET',
       headers: {
         'User-Agent': 'xpmaestrocloud-server',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0',
+        'Accept': 'application/vnd.github.v3.raw',
       },
     };
 
