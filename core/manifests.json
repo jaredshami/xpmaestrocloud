@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.3",
+  "latest": "v1.0.4",
   "versions": [
+    {
+      "version": "v1.0.4",
+      "releaseDate": "2026-01-12",
+      "description": "Latest version for testing",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.4",
+      "changeLog": "- Test deployment of v1.0.4"
+    },
     {
       "version": "v1.0.3",
       "releaseDate": "2026-01-12",
       "description": "Test version with deployment fix",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.3",
       "changeLog": "- Deployment fix: manifest no longer modified\n- Only git pull and file copying"
     },
