@@ -1,35 +1,11 @@
 {
-  "latest": "v1.0.4",
+  "latest": "v1.0",
   "versions": [
-    {
-      "version": "v1.0.4",
-      "releaseDate": "2026-01-12",
-      "description": "Test deployment after fixes",
-      "status": "latest",
-      "downloadUrl": "/core/versions/v1.0.4",
-      "changeLog": "- Testing corrected deployment process\n- All fixes applied and tested"
-    },
-    {
-      "version": "v1.0.3",
-      "releaseDate": "2026-01-12",
-      "description": "Additional improvements and fixes",
-      "status": "stable",
-      "downloadUrl": "/core/versions/v1.0.3",
-      "changeLog": "- Additional improvements\n- Bug fixes\n- Performance optimizations"
-    },
-    {
-      "version": "v1.0.2",
-      "releaseDate": "2026-01-12",
-      "description": "Enhanced features and improvements",
-      "status": "stable",
-      "downloadUrl": "/core/versions/v1.0.2",
-      "changeLog": "- Enhanced features\n- Performance improvements\n- Bug fixes"
-    },
     {
       "version": "v1.0",
       "releaseDate": "2026-01-12",
       "description": "Core version",
-      "status": "stable",
+      "status": "latest",
       "downloadUrl": "/core/versions/v1.0",
       "changeLog": "- Core version"
     }
