@@ -260,9 +260,10 @@ exports.getCoreFile = async (req, res, next) => {
 // Helper function to fetch manifest from GitHub
 const fetchGitHubManifest = () => {
   return new Promise((resolve, reject) => {
+    const timestamp = Date.now();
     const options = {
       hostname: 'raw.githubusercontent.com',
-      path: '/jaredshami/xpmaestrocloud/master/core/manifests.json',
+      path: `/jaredshami/xpmaestrocloud/master/core/manifests.json?t=${timestamp}`,
       method: 'GET',
       headers: {
         'User-Agent': 'xpmaestrocloud-server',
