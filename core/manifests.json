@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.4",
+  "latest": "v1.0.5",
   "versions": [
+    {
+      "version": "v1.0.5",
+      "releaseDate": "2026-01-12",
+      "description": "Testing deployment with status fix",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.5",
+      "changeLog": "- Latest version for deployment testing\n- Verifying manifest status updates work correctly"
+    },
     {
       "version": "v1.0.4",
       "releaseDate": "2026-01-12",
       "description": "Testing manifest status fix",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.4",
       "changeLog": "- Testing manifest status updates\n- Deployment process verification"
     },
