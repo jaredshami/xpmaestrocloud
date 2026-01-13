@@ -1,0 +1,7 @@
+{
+  "environment": "development",
+  "debug": true,
+  "logging": "debug",
+  "cache": false,
+  "hotReload": true
+}

@@ -1,0 +1,7 @@
+{
+  "host": "localhost",
+  "port": 5432,
+  "database": "xpmaestro",
+  "poolSize": 10,
+  "timeout": 30000
+}

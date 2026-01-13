@@ -1,13 +1,29 @@
 {
-  "latest": "v3.0.0",
+  "latest": "v4.0.0",
   "versions": [
+    {
+      "version": "v4.0.0",
+      "releaseDate": "2026-01-12",
+      "description": "Complete architectural overhaul with next-generation features",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v4.0.0",
+      "changeLog": "- Websocket real-time updates\n- WebGL GPU acceleration\n- Service Worker offline support\n- Progressive Web App ready\n- Advanced security and encryption"
+    },
+    {
+      "version": "v3.0.1",
+      "releaseDate": "2026-01-12",
+      "description": "Patch release with bug fixes and stability improvements",
+      "status": "stable",
+      "downloadUrl": "/core/versions/v3.0.1",
+      "changeLog": "- Bug fixes\n- Stability improvements\n- Performance tuning"
+    },
     {
       "version": "v3.0.0",
       "releaseDate": "2026-01-12",
       "description": "Major version 3.0.0 with performance optimizations",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v3.0.0",
-      "changeLog": "- Performance optimizations\n- Request throttling\n- Auto-scaling support\n- Performance metrics\n- Enhanced caching strategy"
+      "changeLog": "- Performance optimizations\n- Request throttling\n- Auto-scaling support"
     },
     {
       "version": "v2.0.0",
@@ -15,39 +31,39 @@
       "description": "Major version 2.0.0 with comprehensive features",
       "status": "stable",
       "downloadUrl": "/core/versions/v2.0.0",
-      "changeLog": "- New plugin system\n- Enhanced state management\n- 28 new files across multiple categories"
+      "changeLog": "- New plugin system\n- Enhanced state management\n- 28 new files"
     },
     {
       "version": "v1.0.5",
       "releaseDate": "2026-01-12",
-      "description": "Latest version with all features",
+      "description": "Version 1.0.5",
       "status": "stable",
       "downloadUrl": "/core/versions/v1.0.5",
-      "changeLog": "- Test deployment of v1.0.5"
+      "changeLog": "- Stability improvements"
     },
     {
       "version": "v1.0.4",
       "releaseDate": "2026-01-12",
-      "description": "Latest version for testing",
+      "description": "Version 1.0.4",
       "status": "stable",
       "downloadUrl": "/core/versions/v1.0.4",
-      "changeLog": "- Test deployment of v1.0.4"
+      "changeLog": "- Features and fixes"
     },
     {
       "version": "v1.0.3",
       "releaseDate": "2026-01-12",
-      "description": "Test version with deployment fix",
+      "description": "Version 1.0.3",
       "status": "stable",
       "downloadUrl": "/core/versions/v1.0.3",
-      "changeLog": "- Deployment fix: manifest no longer modified\n- Only git pull and file copying"
+      "changeLog": "- Deployment improvements"
     },
     {
       "version": "v1.0.2",
       "releaseDate": "2026-01-12",
-      "description": "Enhanced features and improvements",
+      "description": "Version 1.0.2",
       "status": "stable",
       "downloadUrl": "/core/versions/v1.0.2",
-      "changeLog": "- Enhanced features\n- Performance improvements\n- Bug fixes"
+      "changeLog": "- Bug fixes"
     },
     {
       "version": "v1.0.0",
@@ -55,7 +71,7 @@
       "description": "Core version",
       "status": "stable",
       "downloadUrl": "/core/versions/v1.0",
-      "changeLog": "- Core version"
+      "changeLog": "- Initial release"
     }
   ],
   "maintenance": {

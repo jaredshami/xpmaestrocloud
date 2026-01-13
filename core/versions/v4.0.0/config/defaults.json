@@ -1,0 +1,13 @@
+{
+{\n  "version": "4.0.0",
+  "debug": false,
+  "logging": "info",
+  "cache": true,
+  "cacheTTL": 7200,
+  "performanceMode": true,
+  "enableMetrics": true,
+  "enableWebsockets": true,
+  "enableWebGL": true,
+  "enableServiceWorker": true,
+  "enablePWA": true
+}

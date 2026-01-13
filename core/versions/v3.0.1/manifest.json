@@ -1,0 +1,25 @@
+{
+  "version": "3.0.1",
+  "name": "XP Maestro Cloud Core v3.0.1",
+  "description": "Patch release with bug fixes and stability improvements",
+  "releaseDate": "2026-01-12",
+  "files": {
+    "css": 5,
+    "js": 5,
+    "config": 4,
+    "lib": 4,
+    "templates": 4,
+    "plugins": 3,
+    "utils": 3
+  },
+  "features": [
+    "Advanced plugin system",
+    "Performance optimizations",
+    "Improved caching strategy",
+    "Better error handling",
+    "More utilities",
+    "Performance metrics",
+    "Request throttling",
+    "Auto-scaling support"
+  ]
+}
