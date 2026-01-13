@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.5",
+  "latest": "v1.0.6",
   "versions": [
+    {
+      "version": "v1.0.6",
+      "releaseDate": "2026-01-12",
+      "description": "Bug fixes and stability improvements",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.6",
+      "changeLog": "- Fixed critical bugs in core engine\n- Improved system stability\n- Optimized memory usage\n- Enhanced error recovery"
+    },
     {
       "version": "v1.0.5",
       "releaseDate": "2026-01-12",
       "description": "UI improvements and minor fixes",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.5",
       "changeLog": "- Enhanced user interface components\n- Improved visual consistency\n- Fixed minor CSS issues\n- Better performance in rendering"
     },
