@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0",
+  "latest": "v1.0.2",
   "versions": [
+    {
+      "version": "v1.0.2",
+      "releaseDate": "2026-01-12",
+      "description": "Enhanced features and improvements",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.2",
+      "changeLog": "- Enhanced features\n- Performance improvements\n- Bug fixes"
+    },
     {
       "version": "v1.0",
       "releaseDate": "2026-01-12",
       "description": "Core version",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0",
       "changeLog": "- Core version"
     }
