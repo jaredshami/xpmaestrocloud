@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.1",
+  "latest": "v1.0.2",
   "versions": [
+    {
+      "version": "v1.0.2",
+      "releaseDate": "2026-01-13",
+      "description": "New features and improvements",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.2",
+      "changeLog": "- Added new features\n- Performance improvements\n- Bug fixes\n- Enhanced stability"
+    },
     {
       "version": "v1.0.1",
       "releaseDate": "2026-01-12",
       "description": "Bug fixes and performance improvements",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.1",
       "changeLog": "- Improved error handling\n- Fixed template variable replacement edge cases\n- Performance optimizations\n- Better validation in helper functions"
     }
