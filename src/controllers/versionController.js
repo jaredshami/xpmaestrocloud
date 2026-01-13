@@ -401,13 +401,16 @@ async function deploymentWorker(versionNumber, description, adminId) {
     const versionDir = path.join(CORE_DIR, 'versions', normalizedVersion);
 
     // Step 1: Pull core files from GitHub
+    console.log(`[Deployment] Starting git pull from: ${gitDir}`);
     console.log(`[Deployment] Pulling core files for version ${versionNumber}`);
     try {
-      await execAsync(`cd "${gitDir}" && git pull origin master`, {
+      const pullResult = await execAsync(`cd "${gitDir}" && git pull origin master`, {
         maxBuffer: 50 * 1024 * 1024,
       });
+      console.log(`[Deployment] Git pull output:`, pullResult.stdout);
     } catch (pullError) {
       console.error(`[Deployment] Git pull error:`, pullError.message);
+      console.error(`[Deployment] Git pull stderr:`, pullError.stderr);
       throw new Error(`Failed to pull from GitHub: ${pullError.message}`);
     }
 
@@ -421,12 +424,22 @@ async function deploymentWorker(versionNumber, description, adminId) {
     const srcCoreDir = path.join(gitDir, 'core');
     const srcVersionDir = path.join(srcCoreDir, 'versions', normalizedVersion);
     
+    console.log(`[Deployment] Source core dir: ${srcCoreDir}`);
+    console.log(`[Deployment] Source version dir: ${srcVersionDir}`);
+    console.log(`[Deployment] Checking if source version exists...`);
+    
     // Copy all files from the source version folder
     if (fs.existsSync(srcVersionDir)) {
-      console.log(`[Deployment] Copying files from ${srcVersionDir}`);
+      console.log(`[Deployment] Source version folder found! Contents:`, fs.readdirSync(srcVersionDir));
+      console.log(`[Deployment] Copying files from ${srcVersionDir} to ${versionDir}`);
       copyDirRecursive(srcVersionDir, versionDir);
+      console.log(`[Deployment] Copy complete. Destination contents:`, fs.readdirSync(versionDir));
     } else {
       console.error(`[Deployment] Source version folder not found: ${srcVersionDir}`);
+      console.error(`[Deployment] Checking if core/versions exists:`, fs.existsSync(path.join(srcCoreDir, 'versions')));
+      if (fs.existsSync(path.join(srcCoreDir, 'versions'))) {
+        console.error(`[Deployment] Contents of core/versions:`, fs.readdirSync(path.join(srcCoreDir, 'versions')));
+      }
       throw new Error(`Version folder not found in GitHub: ${normalizedVersion}`);
     }
 
