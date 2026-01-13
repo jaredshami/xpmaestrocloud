@@ -409,6 +409,12 @@ async function deploymentWorker(versionNumber, description, adminId) {
     console.log(`[Deployment] Starting git pull from: ${gitDir}`);
     console.log(`[Deployment] Pulling core files for version ${versionNumber}`);
     try {
+      // Stash any local changes to prevent merge conflicts
+      await execAsync(`cd "${gitDir}" && git stash`, {
+        maxBuffer: 50 * 1024 * 1024,
+      });
+      console.log(`[Deployment] Stashed local changes`);
+      
       const pullResult = await execAsync(`cd "${gitDir}" && git pull origin master`, {
         maxBuffer: 50 * 1024 * 1024,
       });
