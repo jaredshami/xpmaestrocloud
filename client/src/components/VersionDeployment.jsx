@@ -183,22 +183,32 @@ export default function VersionDeployment({ onClose, onDeploymentComplete }) {
 
           {/* Deployment Status Info */}
           <div className={`border rounded-lg p-4 ${deploymentStatus?.hasNewVersion ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
-            <div className="flex items-start gap-3">
-              <GitBranch className={`w-5 h-5 mt-0.5 flex-shrink-0 ${deploymentStatus?.hasNewVersion ? 'text-green-600' : 'text-yellow-600'}`} />
-              <div>
-                <h3 className={`font-semibold mb-2 ${deploymentStatus?.hasNewVersion ? 'text-green-900' : 'text-yellow-900'}`}>
-                  {deploymentStatus?.hasNewVersion ? 'New Version Available' : 'No New Version'}
-                </h3>
-                <div className={`space-y-1 text-sm ${deploymentStatus?.hasNewVersion ? 'text-green-800' : 'text-yellow-800'}`}>
-                  <p><span className="font-medium">GitHub Latest:</span> {deploymentStatus?.gitHubLatest}</p>
-                  <p><span className="font-medium">VPS Latest:</span> {deploymentStatus?.vpsLatest}</p>
-                  {deploymentStatus?.hasNewVersion ? (
-                    <p className="font-semibold text-green-700 mt-2">✓ Ready to deploy {deploymentStatus?.gitHubLatest}</p>
-                  ) : (
-                    <p className="text-yellow-700 mt-2">Versions are in sync</p>
-                  )}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1">
+                <GitBranch className={`w-5 h-5 mt-0.5 flex-shrink-0 ${deploymentStatus?.hasNewVersion ? 'text-green-600' : 'text-yellow-600'}`} />
+                <div className="flex-1">
+                  <h3 className={`font-semibold mb-2 ${deploymentStatus?.hasNewVersion ? 'text-green-900' : 'text-yellow-900'}`}>
+                    {deploymentStatus?.hasNewVersion ? 'New Version Available' : 'No New Version'}
+                  </h3>
+                  <div className={`space-y-1 text-sm ${deploymentStatus?.hasNewVersion ? 'text-green-800' : 'text-yellow-800'}`}>
+                    <p><span className="font-medium">GitHub Latest:</span> {deploymentStatus?.gitHubLatest}</p>
+                    <p><span className="font-medium">VPS Latest:</span> {deploymentStatus?.vpsLatest}</p>
+                    {deploymentStatus?.hasNewVersion ? (
+                      <p className="font-semibold text-green-700 mt-2">✓ Ready to deploy {deploymentStatus?.gitHubLatest}</p>
+                    ) : (
+                      <p className="text-yellow-700 mt-2">Versions are in sync</p>
+                    )}
+                  </div>
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={checkDeploymentStatus}
+                disabled={loading}
+                className="ml-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-medium rounded transition"
+              >
+                {loading ? 'Checking...' : 'Check for Updates'}
+              </button>
             </div>
           </div>
 
