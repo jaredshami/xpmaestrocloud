@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "debug": false,
+  "logging": "warn",
+  "cache": true,
+  "cacheTTL": 7200,
+  "minify": true
+}

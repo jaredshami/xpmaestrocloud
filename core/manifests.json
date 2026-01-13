@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.5",
+  "latest": "v2.0",
   "versions": [
+    {
+      "version": "v2.0",
+      "releaseDate": "2026-01-12",
+      "description": "Major version 2.0 with comprehensive features",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v2.0",
+      "changeLog": "- New plugin system\n- Enhanced state management\n- 28 new files across multiple categories\n- Better error handling\n- Improved caching"
+    },
     {
       "version": "v1.0.5",
       "releaseDate": "2026-01-12",
       "description": "Latest version with all features",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.5",
       "changeLog": "- Test deployment of v1.0.5"
     },

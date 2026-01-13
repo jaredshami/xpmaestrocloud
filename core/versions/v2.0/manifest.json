@@ -1,0 +1,22 @@
+{
+  "version": "2.0",
+  "name": "XP Maestro Cloud Core v2.0",
+  "description": "Major version 2.0 with enhanced features",
+  "releaseDate": "2026-01-12",
+  "files": {
+    "css": 5,
+    "js": 5,
+    "config": 4,
+    "lib": 4,
+    "templates": 4,
+    "plugins": 3,
+    "utils": 3
+  },
+  "features": [
+    "New plugin system",
+    "Enhanced state management",
+    "Improved caching",
+    "Better error handling",
+    "More utilities"
+  ]
+}

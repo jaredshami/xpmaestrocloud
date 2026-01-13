@@ -1,0 +1,7 @@
+{
+  "version": "2.0",
+  "debug": false,
+  "logging": "info",
+  "cache": true,
+  "cacheTTL": 3600
+}
