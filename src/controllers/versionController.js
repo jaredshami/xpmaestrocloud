@@ -397,7 +397,6 @@ exports.deployVersion = async (req, res, next) => {
 async function deploymentWorker(versionNumber, description, adminId) {
   try {
     const gitDir = path.join(__dirname, '../..');
-    const manifestPath = path.join(CORE_DIR, 'manifests.json');
     
     // Normalize versionNumber to always include 'v' prefix
     const normalizedVersion = versionNumber.startsWith('v') ? versionNumber : `v${versionNumber}`;
@@ -446,57 +445,7 @@ async function deploymentWorker(versionNumber, description, adminId) {
       throw new Error(`Version folder not found in GitHub: ${normalizedVersion}`);
     }
 
-    // Step 4: Create manifest for this version
-    const versionManifestPath = path.join(versionDir, 'manifest.json');
-    const versionManifest = {
-      version: versionNumber,
-      description,
-      releaseDate: new Date().toISOString(),
-      createdBy: adminId,
-      files: getFileManifest(versionDir),
-    };
-    fs.writeFileSync(versionManifestPath, JSON.stringify(versionManifest, null, 2));
-
-    // Step 5: Update main manifests.json
-    const currentManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-    const { stdout: gitHash } = await execAsync(
-      `cd "${gitDir}" && git log -1 --pretty=format:"%H" -- core/manifests.json`
-    );
-
-    // Update all existing versions to "stable" status, but filter out the one being deployed
-    const updatedVersions = currentManifest.versions
-      .filter(v => v.version !== normalizedVersion)
-      .map(v => ({
-        ...v,
-        status: 'stable'
-      }));
-
-    const updatedManifest = {
-      ...currentManifest,
-      latest: normalizedVersion,
-      lastDeployed: {
-        version: normalizedVersion,
-        date: new Date().toISOString(),
-        gitHash: gitHash.trim(),
-      },
-      versions: [
-        {
-          version: normalizedVersion,
-          description,
-          status: 'latest',
-          releaseDate: new Date().toISOString(),
-          stats: {
-            instancesUsing: 0,
-            fileCount: Object.keys(versionManifest.files).length,
-            size: getDirSize(versionDir),
-          },
-        },
-        ...updatedVersions,
-      ],
-    };
-
-    fs.writeFileSync(manifestPath, JSON.stringify(updatedManifest, null, 2));
-
+    // Manifest is already updated in the GitHub repo and pulled via git pull
     console.log(`[Deployment] Version ${normalizedVersion} deployed successfully`);
   } catch (error) {
     console.error(`[Deployment] Error deploying version:`, error.message);
