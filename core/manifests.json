@@ -1,61 +1,13 @@
 {
-  "latest": "v1.0.7",
+  "latest": "v1.0",
   "versions": [
     {
-      "version": "v1.0.7",
+      "version": "v1.0",
       "releaseDate": "2026-01-12",
-      "description": "True deployment test with all fixes",
+      "description": "Core version",
       "status": "latest",
-      "downloadUrl": "/core/versions/v1.0.7",
-      "changeLog": "- Complete test of deployment process\n- All files should be copied correctly\n- Proper version naming without extra v"
-    },
-    {
-      "version": "v1.0.6",
-      "releaseDate": "2026-01-12",
-      "description": "Final testing version",
-      "status": "stable",
-      "downloadUrl": "/core/versions/v1.0.6",
-      "changeLog": "- Final version for comprehensive testing\n- Full deployment workflow verification"
-    },
-    {
-      "version": "v1.0.5",
-      "releaseDate": "2026-01-12",
-      "description": "Testing deployment with status fix",
-      "status": "stable",
-      "downloadUrl": "/core/versions/v1.0.5",
-      "changeLog": "- Latest version for deployment testing\n- Verifying manifest status updates work correctly"
-    },
-    {
-      "version": "v1.0.4",
-      "releaseDate": "2026-01-12",
-      "description": "Testing manifest status fix",
-      "status": "stable",
-      "downloadUrl": "/core/versions/v1.0.4",
-      "changeLog": "- Testing manifest status updates\n- Deployment process verification"
-    },
-    {
-      "version": "v1.0.3",
-      "releaseDate": "2026-01-13",
-      "description": "Advanced features and optimization",
-      "status": "stable",
-      "downloadUrl": "/core/versions/v1.0.3",
-      "changeLog": "- Advanced feature set\n- System optimization\n- Enhanced performance\n- Improved reliability"
-    },
-    {
-      "version": "v1.0.2",
-      "releaseDate": "2026-01-13",
-      "description": "New features and improvements",
-      "status": "stable",
-      "downloadUrl": "/core/versions/v1.0.2",
-      "changeLog": "- Added new features\n- Performance improvements\n- Bug fixes\n- Enhanced stability"
-    },
-    {
-      "version": "v1.0.1",
-      "releaseDate": "2026-01-12",
-      "description": "Bug fixes and performance improvements",
-      "status": "stable",
-      "downloadUrl": "/core/versions/v1.0.1",
-      "changeLog": "- Improved error handling\n- Fixed template variable replacement edge cases\n- Performance optimizations\n- Better validation in helper functions"
+      "downloadUrl": "/core/versions/v1.0",
+      "changeLog": "- Core version"
     }
   ],
   "maintenance": {
