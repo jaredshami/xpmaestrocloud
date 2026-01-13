@@ -267,6 +267,9 @@ const fetchGitHubManifest = () => {
       method: 'GET',
       headers: {
         'User-Agent': 'xpmaestrocloud-server',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     };
 
@@ -460,11 +463,13 @@ async function deploymentWorker(versionNumber, description, adminId) {
       `cd "${gitDir}" && git log -1 --pretty=format:"%H" -- core/manifests.json`
     );
 
-    // Update all existing versions to "stable" status
-    const updatedVersions = currentManifest.versions.map(v => ({
-      ...v,
-      status: 'stable'
-    }));
+    // Update all existing versions to "stable" status, but filter out the one being deployed
+    const updatedVersions = currentManifest.versions
+      .filter(v => v.version !== normalizedVersion)
+      .map(v => ({
+        ...v,
+        status: 'stable'
+      }));
 
     const updatedManifest = {
       ...currentManifest,
