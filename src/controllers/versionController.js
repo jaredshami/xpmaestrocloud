@@ -393,7 +393,7 @@ exports.deployVersion = async (req, res, next) => {
 // Worker function to handle deployment in background
 async function deploymentWorker(versionNumber, description, adminId) {
   try {
-    const gitDir = path.join(__dirname, '../../..');
+    const gitDir = path.join(__dirname, '../..');
     const manifestPath = path.join(CORE_DIR, 'manifests.json');
     
     // Normalize versionNumber to always include 'v' prefix
