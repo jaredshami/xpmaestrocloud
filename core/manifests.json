@@ -1,11 +1,19 @@
 {
-  "latest": "v1.0.3",
+  "latest": "v1.0.4",
   "versions": [
+    {
+      "version": "v1.0.4",
+      "releaseDate": "2026-01-12",
+      "description": "Test deployment after fixes",
+      "status": "latest",
+      "downloadUrl": "/core/versions/v1.0.4",
+      "changeLog": "- Testing corrected deployment process\n- All fixes applied and tested"
+    },
     {
       "version": "v1.0.3",
       "releaseDate": "2026-01-12",
       "description": "Additional improvements and fixes",
-      "status": "latest",
+      "status": "stable",
       "downloadUrl": "/core/versions/v1.0.3",
       "changeLog": "- Additional improvements\n- Bug fixes\n- Performance optimizations"
     },
