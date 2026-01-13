@@ -261,9 +261,10 @@ exports.getCoreFile = async (req, res, next) => {
 const fetchGitHubManifest = () => {
   return new Promise((resolve, reject) => {
     const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 15);
     const options = {
       hostname: 'raw.githubusercontent.com',
-      path: `/jaredshami/xpmaestrocloud/master/core/manifests.json?t=${timestamp}`,
+      path: `/jaredshami/xpmaestrocloud/master/core/manifests.json?t=${timestamp}&r=${random}`,
       method: 'GET',
       headers: {
         'User-Agent': 'xpmaestrocloud-server',
