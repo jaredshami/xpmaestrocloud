@@ -352,9 +352,9 @@ exports.deployVersion = async (req, res, next) => {
       throw new ValidationError('versionNumber and description are required');
     }
 
-    // Validate version format (e.g., 1.0.0, 1.1.0)
-    if (!/^\d+\.\d+\.\d+$/.test(versionNumber)) {
-      throw new ValidationError('Version must be in format X.Y.Z (e.g., 1.0.0)');
+    // Validate version format (e.g., 1.0.0, v1.0.0)
+    if (!/^v?\d+\.\d+\.\d+$/.test(versionNumber)) {
+      throw new ValidationError('Version must be in format X.Y.Z or vX.Y.Z (e.g., 1.0.0 or v1.0.0)');
     }
 
     const manifestPath = path.join(CORE_DIR, 'manifests.json');
