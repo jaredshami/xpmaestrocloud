@@ -395,7 +395,10 @@ async function deploymentWorker(versionNumber, description, adminId) {
   try {
     const gitDir = path.join(__dirname, '../../..');
     const manifestPath = path.join(CORE_DIR, 'manifests.json');
-    const versionDir = path.join(CORE_DIR, 'versions', `v${versionNumber}`);
+    
+    // Normalize versionNumber to always include 'v' prefix
+    const normalizedVersion = versionNumber.startsWith('v') ? versionNumber : `v${versionNumber}`;
+    const versionDir = path.join(CORE_DIR, 'versions', normalizedVersion);
 
     // Step 1: Pull core files from GitHub
     console.log(`[Deployment] Pulling core files for version ${versionNumber}`);
@@ -416,20 +419,15 @@ async function deploymentWorker(versionNumber, description, adminId) {
 
     // Step 3: Copy core files to version folder
     const srcCoreDir = path.join(gitDir, 'core');
-    const filesToCopy = [
-      'versions/v1.0/templates',
-      'versions/v1.0/lib',
-      'versions/v1.0/assets',
-      'versions/v1.0/config',
-    ];
-
-    for (const file of filesToCopy) {
-      const src = path.join(srcCoreDir, file);
-      const dest = path.join(versionDir, path.basename(file));
-      
-      if (fs.existsSync(src)) {
-        copyDirRecursive(src, dest);
-      }
+    const srcVersionDir = path.join(srcCoreDir, 'versions', normalizedVersion);
+    
+    // Copy all files from the source version folder
+    if (fs.existsSync(srcVersionDir)) {
+      console.log(`[Deployment] Copying files from ${srcVersionDir}`);
+      copyDirRecursive(srcVersionDir, versionDir);
+    } else {
+      console.error(`[Deployment] Source version folder not found: ${srcVersionDir}`);
+      throw new Error(`Version folder not found in GitHub: ${normalizedVersion}`);
     }
 
     // Step 4: Create manifest for this version
@@ -457,15 +455,15 @@ async function deploymentWorker(versionNumber, description, adminId) {
 
     const updatedManifest = {
       ...currentManifest,
-      latest: versionNumber,
+      latest: normalizedVersion,
       lastDeployed: {
-        version: versionNumber,
+        version: normalizedVersion,
         date: new Date().toISOString(),
         gitHash: gitHash.trim(),
       },
       versions: [
         {
-          version: versionNumber,
+          version: normalizedVersion,
           description,
           status: 'latest',
           releaseDate: new Date().toISOString(),
@@ -481,7 +479,7 @@ async function deploymentWorker(versionNumber, description, adminId) {
 
     fs.writeFileSync(manifestPath, JSON.stringify(updatedManifest, null, 2));
 
-    console.log(`[Deployment] Version ${versionNumber} deployed successfully`);
+    console.log(`[Deployment] Version ${normalizedVersion} deployed successfully`);
   } catch (error) {
     console.error(`[Deployment] Error deploying version:`, error.message);
   }
