@@ -448,6 +448,12 @@ async function deploymentWorker(versionNumber, description, adminId) {
       `cd "${gitDir}" && git log -1 --pretty=format:"%H" -- core/manifests.json`
     );
 
+    // Update all existing versions to "stable" status
+    const updatedVersions = currentManifest.versions.map(v => ({
+      ...v,
+      status: 'stable'
+    }));
+
     const updatedManifest = {
       ...currentManifest,
       latest: versionNumber,
@@ -468,7 +474,7 @@ async function deploymentWorker(versionNumber, description, adminId) {
             size: getDirSize(versionDir),
           },
         },
-        ...currentManifest.versions,
+        ...updatedVersions,
       ],
     };
 
